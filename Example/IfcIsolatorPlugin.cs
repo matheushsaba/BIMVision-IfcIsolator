@@ -15,7 +15,7 @@ namespace Example
 
     class IfcIsolatorPlugin : Plugin
     {
-        const string SPLITTER_EXECUTABLE_NAME = "ConsoleRunner.exe";
+        const string SPLITTER_EXECUTABLE_NAME = "IfcIsolatorTerminal_x64.exe";
 
         private ApiWrapper api;
 
@@ -50,8 +50,8 @@ namespace Example
             _isolateSingleIfc = api.CreateButton(0, IsolateSingleIfc);
             api.SetButtonText(_isolateSingleIfc, "Isolate Into Single IFC", "Isolate selected elements into a new unique IFC file.");
 
-            _isolateMultipleIfcs = api.CreateButton(0, IsolateMultipleIfcs);
-            api.SetButtonText(_isolateMultipleIfcs, "Isolate Into Multiple IFCs", "Isolate each selected elements into a new IFC file.");
+            //_isolateMultipleIfcs = api.CreateButton(0, IsolateMultipleIfcs);
+            //api.SetButtonText(_isolateMultipleIfcs, "Isolate Into Multiple IFCs", "Isolate each selected elements into a new IFC file.");
         }
 
         public override void OnCallLimit()
