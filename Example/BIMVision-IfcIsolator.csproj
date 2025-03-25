@@ -7,8 +7,8 @@
     <ProjectGuid>{362E40F4-4A37-48B3-A7A5-93E5535A9B22}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Example</RootNamespace>
-    <AssemblyName>Example</AssemblyName>
+    <RootNamespace>IfcIsolatorPlugin</RootNamespace>
+    <AssemblyName>IfcIsolatorPlugin</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
