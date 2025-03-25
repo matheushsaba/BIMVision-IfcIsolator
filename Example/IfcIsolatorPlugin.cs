@@ -30,7 +30,7 @@ namespace Example
             info.producer = "Matheus Henrique Sabadin";
             info.www = "www.linkedin.com/in/m-sab/";
             info.email = "-";
-            info.description = "Plugin to isolate elements into different ifc files.";
+            info.description = "Plugin to isolate elements into different IFC files.";
             //info.help_directory = "";
         }
 
