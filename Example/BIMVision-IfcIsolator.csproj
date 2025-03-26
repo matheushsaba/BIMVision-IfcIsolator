@@ -91,6 +91,15 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\UnmanagedExports.Repack.1.0.4\build\UnmanagedExports.Repack.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\UnmanagedExports.Repack.1.0.4\build\UnmanagedExports.Repack.targets'))" />
   </Target>
+  <PropertyGroup>
+    <PostBuildEvent>if "$(ConfigurationName)" == "Debug" (
+    if "$(PlatformTarget)" == "x86" (
+        xcopy /Y /I "$(TargetPath)" "C:\Program Files (x86)\Datacomp\BIM Vision\plugins"
+    ) else if "$(PlatformTarget)" == "x64" (
+        xcopy /Y /I "$(TargetPath)" "C:\Program Files (x86)\Datacomp\BIM Vision\plugins_x64"
+    )
+)</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
