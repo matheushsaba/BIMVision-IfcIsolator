@@ -34,7 +34,7 @@ If the project fails to build after installing the required tools, try the follo
 
 To use this plugin with BIM Vision:
 
-1. Download the compiled `.dll` files from the [Releases](https://github.com/matheushsaba/BIMVision-FindByGuid/releases) section.
+1. Download the compiled `.dll` files and the `.exe` file from the [Releases](https://github.com/matheushsaba/BIMVision-IfcIsolator/releases) section.
 2. Paste the files into the appropriate BIM Vision plugins directory.
 
 **Plugin installation paths:**
@@ -45,8 +45,9 @@ To use this plugin with BIM Vision:
 - **64-bit version:**  
   `C:\Program Files (x86)\Datacomp\BIM Vision\plugins_x64`
 
-![image](https://github.com/user-attachments/assets/c7d2735a-7cf1-49d0-b099-f78a1e058620)
-![image](https://github.com/user-attachments/assets/3a07f941-db23-4d3e-a93d-046bdb1c3673)
+![image](https://github.com/user-attachments/assets/3294050f-389d-4dfa-b52e-be48e37552f8)
+![image](https://github.com/user-attachments/assets/a5c18a1b-f4cd-4ea8-aee8-7f0fb2ec8ca6)
+
 
 ---
 
