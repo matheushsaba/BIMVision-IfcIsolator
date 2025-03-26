@@ -3,6 +3,9 @@
 ## 🔍 What is IfcIsolator?
 
 **IfcIsolator** is a BIM Vision plugin designed to help you isolate and extract specific elements from an open IFC model into a separate IFC file.
+It runs using the console application built on top of XBim of the [IfcIsolator project](https://github.com/matheushsaba/IfcIsolator).
+https://github.com/user-attachments/assets/69738026-4152-4cab-9021-72664a310d34
+
 
 ### ✨ What It Does
 
