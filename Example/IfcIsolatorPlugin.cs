@@ -5,6 +5,8 @@ using System.Linq;
 namespace Example
 {
     using System.Diagnostics;
+    using System.IO;
+    using System.Reflection;
     using System.Security.Principal;
     using System.Windows.Forms;
 
@@ -146,7 +148,7 @@ namespace Example
             splitterProcess.StartInfo.UseShellExecute = false;
             splitterProcess.StartInfo.CreateNoWindow = true;
             splitterProcess.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-            splitterProcess.StartInfo.FileName = SPLITTER_EXECUTABLE_NAME;
+            splitterProcess.StartInfo.FileName = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), SPLITTER_EXECUTABLE_NAME);
             splitterProcess.StartInfo.Arguments = $"{sourceFilePath} {outputFolder} {entityLabelsArgument}";
             splitterProcess.StartInfo.RedirectStandardError = false;
             splitterProcess.StartInfo.RedirectStandardOutput = false;
