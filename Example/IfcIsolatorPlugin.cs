@@ -5,6 +5,7 @@ using System.Linq;
 namespace Example
 {
     using System.Diagnostics;
+    using System.Security.Principal;
     using System.Windows.Forms;
 
     using BIMVision;
@@ -81,6 +82,12 @@ namespace Example
 
         private void IsolateSingleIfc()
         {
+            if (!IsRunningAsAdministrator())
+            {
+                api.MessageBox("Administrator Required", "Please run this application as Administrator to isolate IFC files.", 0);
+                return;
+            }
+
             var selectedObjects = api.GetSelected();
             if (selectedObjects is null)
             {
@@ -149,6 +156,15 @@ namespace Example
             splitterProcess.WaitForExit();
 
             return splitterProcess;
+        }
+
+        private static bool IsRunningAsAdministrator()
+        {
+            using (WindowsIdentity identity = WindowsIdentity.GetCurrent())
+            {
+                WindowsPrincipal principal = new WindowsPrincipal(identity);
+                return principal.IsInRole(WindowsBuiltInRole.Administrator);
+            }
         }
     }
 }
