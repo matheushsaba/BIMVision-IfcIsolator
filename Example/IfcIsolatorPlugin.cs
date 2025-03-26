@@ -129,7 +129,7 @@ namespace Example
                 .Select(x => api.GetObjectInfo(x).ifc_entity_number)
                 .ToArray();
 
-            var entityLabelsArgument = $"\"{string.Join(" ", entityLabels)}\"";
+            var entityLabelsArgument = string.Join(" ", entityLabels);
 
             var isolatorProcess = RunProcess(outputFolder, sourceFilePath, entityLabelsArgument);
             if (isolatorProcess.ExitCode == 0)
@@ -149,7 +149,7 @@ namespace Example
             splitterProcess.StartInfo.CreateNoWindow = true;
             splitterProcess.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
             splitterProcess.StartInfo.FileName = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), SPLITTER_EXECUTABLE_NAME);
-            splitterProcess.StartInfo.Arguments = $"{sourceFilePath} {outputFolder} {entityLabelsArgument}";
+            splitterProcess.StartInfo.Arguments = $"\"{sourceFilePath}\" \"{outputFolder}\" \"{entityLabelsArgument}\"";
             splitterProcess.StartInfo.RedirectStandardError = false;
             splitterProcess.StartInfo.RedirectStandardOutput = false;
             splitterProcess.StartInfo.UseShellExecute = false;
