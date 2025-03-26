@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 
 namespace Example
 {
     using System.Diagnostics;
-    using System.IO;
-    using System.Runtime.InteropServices;
     using System.Windows.Forms;
 
     using BIMVision;
@@ -22,7 +18,7 @@ namespace Example
         private OBJECT_ID allId;
         private int _isolateMultipleIfcs;
         private int _isolateSingleIfc;
-
+        private static string _lastSelectedFolder = string.Empty;
 
         public override void GetPluginInfo(ref PluginInfo info)
         {
@@ -92,18 +88,24 @@ namespace Example
                 return;
             }
 
-
             // Prompt the user to pick an output folder
             string outputFolder = string.Empty;
             using (var folderDialog = new FolderBrowserDialog())
             {
                 folderDialog.Description = "Select the output folder for the split IFC file(s)";
+
+                // Use last selected path, or Desktop if none
+                folderDialog.SelectedPath = string.IsNullOrWhiteSpace(_lastSelectedFolder)
+                    ? Environment.GetFolderPath(Environment.SpecialFolder.Desktop)
+                    : _lastSelectedFolder;
+
                 var result = folderDialog.ShowDialog();
 
                 var isResultValid = result == DialogResult.OK && !string.IsNullOrWhiteSpace(folderDialog.SelectedPath);
                 if (isResultValid)
                 {
                     outputFolder = folderDialog.SelectedPath;
+                    _lastSelectedFolder = outputFolder;
                 }
                 else
                 {
@@ -118,8 +120,21 @@ namespace Example
                 .Select(x => api.GetObjectInfo(x).ifc_entity_number)
                 .ToArray();
 
-            var entityLabelsArgument = string.Join(" ", entityLabels);
+            var entityLabelsArgument = $"\"{string.Join(" ", entityLabels)}\"";
 
+            var isolatorProcess = RunProcess(outputFolder, sourceFilePath, entityLabelsArgument);
+            if (isolatorProcess.ExitCode == 0)
+            {
+                api.MessageBox("Success", "The IFC was exported correctly.", 0);
+            }
+            else
+            {
+                api.MessageBox("Error", "There was an error while splitting the IFC.", 0);
+            }
+        }
+
+        private static Process RunProcess(string outputFolder, string sourceFilePath, string entityLabelsArgument)
+        {
             var splitterProcess = new Process();
             splitterProcess.StartInfo.UseShellExecute = false;
             splitterProcess.StartInfo.CreateNoWindow = true;
@@ -133,14 +148,7 @@ namespace Example
             splitterProcess.Start();
             splitterProcess.WaitForExit();
 
-            if (splitterProcess.ExitCode == 0)
-            {
-                api.MessageBox("Success", "The IFC was exported correctly.", 0);
-            }
-            else
-            {
-                api.MessageBox("Error", "There was an error while splitting the IFC.", 0);
-            }
+            return splitterProcess;
         }
     }
 }
