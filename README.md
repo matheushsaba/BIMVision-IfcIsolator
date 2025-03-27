@@ -11,6 +11,7 @@ It runs using the console application built on top of XBim of the [IfcIsolator p
 - Creates a new IFC file containing only the selected elements.
 
 This tool is especially handy when you need to break down complex models into manageable parts or share only relevant components of a project.
+
 ![preview_plugin_compressed](https://github.com/user-attachments/assets/ea19485d-b2f6-4321-bb0c-32a12184de1f)
 
 ---
