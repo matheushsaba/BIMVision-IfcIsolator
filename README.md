@@ -1,5 +1,7 @@
 # BimVision-IfcIsolator
 
+## Supported BIM Vision version: 3.0.1
+
 ## 🔍 What is IfcIsolator?
 
 **IfcIsolator** is a BIM Vision plugin designed to help you isolate and extract specific elements from an open IFC model into a separate IFC file.
