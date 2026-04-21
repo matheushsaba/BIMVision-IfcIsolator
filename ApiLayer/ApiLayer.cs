@@ -19,11 +19,11 @@ namespace ApiLayer
 
         public override void GetPluginInfo(ref PluginInfo info)
         {
-            info.description = "This is a sample plugin.";
-            info.name = "Your plugin name";
-            info.email = "your.email@example.com";
-            info.producer = "Your Name or Company";
-            info.www = "https://yourwebsite.example.com";
+            info.description = "Plugin to isolate elements into different IFC files.";
+            info.name = "Ifc Isolator";
+            info.email = "-";
+            info.producer = "Matheus Henrique Sabadin";
+            info.www = "https://www.linkedin.com/in/m-sab/";
             info.help_directory = _assemblyFolder;
         }
 
@@ -45,7 +45,7 @@ namespace ApiLayer
             _api.SetButtonImage(_pluginButton, _assemblyFolder + "logo32.png");
             _api.SetButtonSmallImage(_pluginButton, _assemblyFolder + "logo16.png");
             _api.SetGalleryItemImage(_pluginButton, _assemblyFolder + "logo32.png");
-            _api.SetButtonText(_pluginButton, "My Plugin", "Test description");
+            _api.SetButtonText(_pluginButton, "Isolate Into Single IFC", "Isolate selected elements into a new unique IFC file.");
             _api.EnableButton(_pluginButton, true);
         }
 
