@@ -6,7 +6,7 @@
     <WriteLinesToFile
       File="$(IntermediateOutputPath)VersionInfo.g.cs"
       Overwrite="true"
-      Lines="[assembly: System.Reflection.AssemblyVersionAttribute(&quot;$(AssemblyVersion)&quot;)]&#xD;&#xA;[assembly: System.Reflection.AssemblyFileVersionAttribute(&quot;$(FileVersion)&quot;)]&#xD;&#xA;[assembly: System.Reflection.AssemblyInformationalVersionAttribute(&quot;$(InformationalVersion)&quot;)]" />
+      Lines="[assembly: System.Reflection.AssemblyVersionAttribute(&quot;$(IfcIsolatorAssemblyVersion)&quot;)]&#xD;&#xA;[assembly: System.Reflection.AssemblyFileVersionAttribute(&quot;$(IfcIsolatorFileVersion)&quot;)]&#xD;&#xA;[assembly: System.Reflection.AssemblyInformationalVersionAttribute(&quot;$(IfcIsolatorInformationalVersion)&quot;)]" />
     <ItemGroup>
       <Compile Include="$(IntermediateOutputPath)VersionInfo.g.cs" />
       <FileWrites Include="$(IntermediateOutputPath)VersionInfo.g.cs" />

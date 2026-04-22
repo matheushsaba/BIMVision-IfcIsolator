@@ -1,11 +1,16 @@
 <Project>
   <PropertyGroup>
-    <VersionPrefix>1.2.0</VersionPrefix>
-    <Version>$(VersionPrefix)</Version>
-    <PackageVersion>$(Version)</PackageVersion>
-    <AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
-    <FileVersion>$(VersionPrefix).0</FileVersion>
-    <InformationalVersion>$(Version)</InformationalVersion>
+    <IfcIsolatorVersion>1.2.0</IfcIsolatorVersion>
+    <IfcIsolatorAssemblyVersion>$(IfcIsolatorVersion).0</IfcIsolatorAssemblyVersion>
+    <IfcIsolatorFileVersion>$(IfcIsolatorAssemblyVersion)</IfcIsolatorFileVersion>
+    <IfcIsolatorInformationalVersion>$(IfcIsolatorVersion)</IfcIsolatorInformationalVersion>
+
+    <VersionPrefix Condition="'$(VersionPrefix)' == ''">$(IfcIsolatorVersion)</VersionPrefix>
+    <Version Condition="'$(Version)' == ''">$(IfcIsolatorVersion)</Version>
+    <PackageVersion Condition="'$(PackageVersion)' == ''">$(Version)</PackageVersion>
+    <AssemblyVersion Condition="'$(AssemblyVersion)' == ''">$(IfcIsolatorAssemblyVersion)</AssemblyVersion>
+    <FileVersion Condition="'$(FileVersion)' == ''">$(IfcIsolatorFileVersion)</FileVersion>
+    <InformationalVersion Condition="'$(InformationalVersion)' == ''">$(IfcIsolatorInformationalVersion)</InformationalVersion>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
 </Project>
