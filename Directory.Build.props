@@ -1,0 +1,11 @@
+<Project>
+  <PropertyGroup>
+    <VersionPrefix>1.2.0</VersionPrefix>
+    <Version>$(VersionPrefix)</Version>
+    <PackageVersion>$(Version)</PackageVersion>
+    <AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
+    <FileVersion>$(VersionPrefix).0</FileVersion>
+    <InformationalVersion>$(Version)</InformationalVersion>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+  </PropertyGroup>
+</Project>

@@ -55,4 +55,9 @@
 	  <None Update="C:\Users\Matheus\source\repos\BIMVision-IfcIsolator-v2\CoreLayer\..\Dependencies\Xbim.IO.MemoryModel.dll" Link="Dependencies\Xbim.IO.MemoryModel.dll" />
 	</ItemGroup>
 
+	<Target Name="KillStaleCoreLayerProcess" BeforeTargets="CopyFilesToOutputDirectory" Condition="'$(Configuration)' == 'Debug'">
+		<Message Text="Stopping stale CoreLayer.exe process before copying Debug build output." Importance="High" />
+		<Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -Command &quot;Get-Process -Name 'CoreLayer' -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue&quot;" IgnoreExitCode="true" />
+	</Target>
+
 </Project>
