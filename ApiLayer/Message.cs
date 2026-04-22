@@ -7,9 +7,10 @@
     }
     public enum MessageType
     {
-        CORE_STATUS_READY,
-        API_STATUS_READY,
-        APP_READY,
+        ISOLATE_SINGLE_IFC_REQUEST,
+        ISOLATE_SINGLE_IFC_COMPLETED,
+        ISOLATE_SINGLE_IFC_FAILED,
+        ISOLATE_SINGLE_IFC_CANCELED,
     }
     public class Argument
     {
