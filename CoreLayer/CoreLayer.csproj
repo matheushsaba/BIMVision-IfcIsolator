@@ -15,11 +15,11 @@
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Platform)'=='x64'">
-		<OutputPath>C:\Program Files (x86)\Datacomp\BIM Vision\plugins_x64\my_plugin\</OutputPath>
+		<OutputPath>C:\Program Files (x86)\Datacomp\BIM Vision\plugins_x64\IfcIsolatorPlugin\</OutputPath>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Platform)'=='x86'">
-		<OutputPath>C:\Program Files (x86)\Datacomp\BIM Vision\plugins\my_plugin\</OutputPath>
+		<OutputPath>C:\Program Files (x86)\Datacomp\BIM Vision\plugins\IfcIsolatorPlugin\</OutputPath>
 	</PropertyGroup>
 
 	<ItemGroup>
