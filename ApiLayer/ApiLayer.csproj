@@ -66,6 +66,17 @@
     </Content>
     <None Include="packages.config" />
   </ItemGroup>
+  <Target Name="CreateBimVisionPluginMarker" AfterTargets="CopyFilesToOutputDirectory">
+    <PropertyGroup>
+      <BimVisionOutputPathWithSlash>$([MSBuild]::EnsureTrailingSlash('$(OutputPath)'))</BimVisionOutputPathWithSlash>
+      <BimVisionOutputDirectory>$([System.IO.Path]::GetDirectoryName($([System.IO.Path]::GetFullPath('$(BimVisionOutputPathWithSlash)'))))</BimVisionOutputDirectory>
+      <BimVisionPluginMarkerDirectory>$([System.IO.Path]::GetDirectoryName('$(BimVisionOutputDirectory)'))</BimVisionPluginMarkerDirectory>
+      <BimVisionPluginMarkerPath>$([System.IO.Path]::Combine('$(BimVisionPluginMarkerDirectory)', '$(AssemblyName).plg'))</BimVisionPluginMarkerPath>
+    </PropertyGroup>
+    <MakeDir Directories="$([System.IO.Path]::GetDirectoryName('$(BimVisionPluginMarkerPath)'))" />
+    <WriteLinesToFile File="$(BimVisionPluginMarkerPath)" Lines="" Overwrite="true" />
+    <Message Text="Created BIM Vision plugin marker: $(BimVisionPluginMarkerPath)" Importance="High" />
+  </Target>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="../packages/UnmanagedExports.1.2.7/tools/RGiesecke.DllExport.targets" Condition="Exists('../packages/UnmanagedExports.1.2.7/tools/RGiesecke.DllExport.targets')" />
 </Project>
