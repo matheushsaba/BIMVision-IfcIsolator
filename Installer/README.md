@@ -1,6 +1,6 @@
 # Ifc Isolator Plugin Installer
 
-The installer is built with Inno Setup, which is free to use and produces a normal Windows `.exe` installer.
+The installer is built with Inno Setup and produces a normal Windows `.exe` installer.
 
 ## Build
 
