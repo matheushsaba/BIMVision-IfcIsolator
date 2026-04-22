@@ -8,6 +8,8 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 
+using IfcIsolator;
+
 namespace CoreLayer
 {
     public partial class MainWindow
@@ -78,14 +80,23 @@ namespace CoreLayer
 
             try
             {
-                var exitCode = RunProcess(outputFolder, sourceFilePath, entityLabelsArgument);
-                if (exitCode == 0)
-                {
-                    SendCommand(new Message { Type = MessageType.ISOLATE_SINGLE_IFC_COMPLETED });
-                    return;
-                }
+                var entityLabels = entityLabelsArgument
+                    .Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(int.Parse);
 
-                SendCommand(CreateFailure("Error", "There was an error while splitting the IFC."));
+                // Now call into your IfcSplitter logic
+                Isolator.SplitByEntityLabels(sourceFilePath, outputFolder, entityLabels);
+                SendCommand(new Message { Type = MessageType.ISOLATE_SINGLE_IFC_COMPLETED });
+                return;
+
+                //var exitCode = RunProcess(outputFolder, sourceFilePath, entityLabelsArgument);
+                //if (exitCode == 0)
+                //{
+                //    SendCommand(new Message { Type = MessageType.ISOLATE_SINGLE_IFC_COMPLETED });
+                //    return;
+                //}
+
+                //SendCommand(CreateFailure("Error", "There was an error while splitting the IFC."));
             }
             catch (Exception ex)
             {
