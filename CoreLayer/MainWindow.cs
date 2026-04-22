@@ -54,12 +54,6 @@ namespace CoreLayer
 
         static void IsolateSingleIfc(Message message)
         {
-            if (!IsRunningAsAdministrator())
-            {
-                SendCommand(CreateFailure("Administrator Required", "Please run BIM Vision as Administrator to isolate IFC files."));
-                return;
-            }
-
             var sourceFilePath = GetArgument(message, "SourceFilePath");
             var entityLabelsArgument = GetArgument(message, "EntityLabels");
 
@@ -215,13 +209,6 @@ namespace CoreLayer
             }
 
             return null;
-        }
-
-        static bool IsRunningAsAdministrator()
-        {
-            using var identity = WindowsIdentity.GetCurrent();
-            var principal = new WindowsPrincipal(identity);
-            return principal.IsInRole(WindowsBuiltInRole.Administrator);
         }
     }
 }
