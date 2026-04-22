@@ -9,7 +9,6 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace ApiLayer
 {
@@ -20,6 +19,7 @@ namespace ApiLayer
         int _pluginButton;
         Process _coreProcess;
         bool _coreListenerStarted;
+        IntPtr _viewerHwnd;
 
         public override void GetPluginInfo(ref PluginInfo info)
         {
@@ -38,12 +38,13 @@ namespace ApiLayer
 
         public override void OnCallLimit()
         {
-            MessageBox.Show("Call limit reached.");
+            ShowError("Error", "Call limit reached.");
         }
 
         public override void OnLoad(PLUGIN_ID pid, bool registered, IntPtr viewerHwnd)
         {
             _api = new ApiWrapper(pid);
+            _viewerHwnd = viewerHwnd;
 
             _pluginButton = _api.CreateButton(0, PluginButtonClick);
             _api.SetButtonImage(_pluginButton, _assemblyFolder + "logo32.png");
@@ -69,14 +70,14 @@ namespace ApiLayer
             var selectedObjects = _api.GetSelected();
             if (selectedObjects == null || selectedObjects.Length == 0)
             {
-                _api.MessageBox("Error", "Objects need to be selected to split an IFC.", 0);
+                ShowError("Error", "Objects need to be selected to split an IFC.");
                 return;
             }
 
             var sourceFilePath = _api.GetLoadedIfcPath();
             if (string.IsNullOrWhiteSpace(sourceFilePath))
             {
-                _api.MessageBox("Error", "No loaded IFC file path was found.", 0);
+                ShowError("Error", "No loaded IFC file path was found.");
                 return;
             }
 
@@ -103,13 +104,13 @@ namespace ApiLayer
                     },
                 });
             }
-            catch (TimeoutException)
+            catch (TimeoutException ex)
             {
-                _api.MessageBox("Error", "CoreLayer did not respond in time. Please try again.", 0);
+                ShowError("Error", "CoreLayer did not respond in time. Please try again.", ex);
             }
             catch (Exception ex)
             {
-                _api.MessageBox("Error", "Unable to start IFC isolation: " + ex.Message, 0);
+                ShowError("Error", "Unable to start IFC isolation.", ex);
             }
         }
 
@@ -120,7 +121,7 @@ namespace ApiLayer
 
             if (!File.Exists(exePath))
             {
-                _api.MessageBox("Error", "CoreLayer.exe not found:\n" + exePath, 0);
+                ShowError("Error", "CoreLayer.exe not found:\n" + exePath);
                 return false;
             }
 
@@ -164,7 +165,10 @@ namespace ApiLayer
                                         _api.MessageBox("Success", "The IFC was exported correctly.", 0);
                                         break;
                                     case MessageType.ISOLATE_SINGLE_IFC_FAILED:
-                                        _api.MessageBox(GetArgument(message, "Title", "Error"), GetArgument(message, "Message", "There was an error while splitting the IFC."), 0);
+                                        ShowError(
+                                            GetArgument(message, "Title", "Error"),
+                                            GetArgument(message, "Message", "There was an error while splitting the IFC."),
+                                            GetArgument(message, "Details", null));
                                         break;
                                     case MessageType.ISOLATE_SINGLE_IFC_CANCELED:
                                         break;
@@ -212,6 +216,21 @@ namespace ApiLayer
 
             var argument = message.Arguments.FirstOrDefault(x => string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase));
             return string.IsNullOrWhiteSpace(argument?.Value) ? defaultValue : argument.Value;
+        }
+
+        void ShowError(string title, string message)
+        {
+            CopyableErrorDialog.Show(title, message, null, _viewerHwnd);
+        }
+
+        void ShowError(string title, string message, Exception exception)
+        {
+            CopyableErrorDialog.Show(title, message, exception?.ToString(), _viewerHwnd);
+        }
+
+        void ShowError(string title, string message, string details)
+        {
+            CopyableErrorDialog.Show(title, message, details, _viewerHwnd);
         }
 
         static string SerializeMessage(Message message)

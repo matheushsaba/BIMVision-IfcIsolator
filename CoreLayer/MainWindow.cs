@@ -100,7 +100,7 @@ namespace CoreLayer
             }
             catch (Exception ex)
             {
-                SendCommand(CreateFailure("Error", "There was an error while splitting the IFC: " + ex.Message));
+                SendCommand(CreateFailure("Error", "There was an error while splitting the IFC.", ex));
             }
         }
 
@@ -239,6 +239,11 @@ namespace CoreLayer
 
         static Message CreateFailure(string title, string message)
         {
+            return CreateFailure(title, message, null);
+        }
+
+        static Message CreateFailure(string title, string message, Exception exception)
+        {
             return new Message
             {
                 Type = MessageType.ISOLATE_SINGLE_IFC_FAILED,
@@ -246,6 +251,7 @@ namespace CoreLayer
                 {
                     new Argument { Name = "Title", Value = title },
                     new Argument { Name = "Message", Value = message },
+                    new Argument { Name = "Details", Value = exception?.ToString() },
                 },
             };
         }

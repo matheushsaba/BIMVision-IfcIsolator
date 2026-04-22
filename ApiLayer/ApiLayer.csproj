@@ -51,6 +51,9 @@
   <ItemGroup>
     <Compile Include="ApiLayer.cs" />
     <Compile Include="BIMVision.cs" />
+    <Compile Include="CopyableErrorDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Message.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
