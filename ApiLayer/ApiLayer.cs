@@ -45,6 +45,7 @@ namespace ApiLayer
         {
             _api = new ApiWrapper(pid);
             _viewerHwnd = viewerHwnd;
+            StartupUpdateCheckPlaceholder.QueueGithubVersionCheck(_assemblyFolder);
 
             _pluginButton = _api.CreateButton(0, PluginButtonClick);
             _api.SetButtonImage(_pluginButton, Path.Combine(_assemblyFolder, "logo32.png"));
