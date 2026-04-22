@@ -47,9 +47,9 @@ namespace ApiLayer
             _viewerHwnd = viewerHwnd;
 
             _pluginButton = _api.CreateButton(0, PluginButtonClick);
-            _api.SetButtonImage(_pluginButton, _assemblyFolder + "logo32.png");
-            _api.SetButtonSmallImage(_pluginButton, _assemblyFolder + "logo16.png");
-            _api.SetGalleryItemImage(_pluginButton, _assemblyFolder + "logo32.png");
+            _api.SetButtonImage(_pluginButton, Path.Combine(_assemblyFolder, "logo32.png"));
+            _api.SetButtonSmallImage(_pluginButton, Path.Combine(_assemblyFolder, "logo16.png"));
+            _api.SetGalleryItemImage(_pluginButton, Path.Combine(_assemblyFolder, "logo32.png"));
             _api.SetButtonText(_pluginButton, "Isolate Into Single IFC", "Isolate selected elements into a new unique IFC file.");
             _api.EnableButton(_pluginButton, true);
 
