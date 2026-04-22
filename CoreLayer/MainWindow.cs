@@ -14,8 +14,6 @@ namespace CoreLayer
 {
     public partial class MainWindow
     {
-        const string SplitterExecutableName = "IfcIsolatorTerminal_x64.exe";
-
         static string _lastSelectedFolder;
 
         [STAThread]
@@ -84,19 +82,9 @@ namespace CoreLayer
                     .Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)
                     .Select(int.Parse);
 
-                // Now call into your IfcSplitter logic
                 Isolator.SplitByEntityLabels(sourceFilePath, outputFolder, entityLabels);
                 SendCommand(new Message { Type = MessageType.ISOLATE_SINGLE_IFC_COMPLETED });
                 return;
-
-                //var exitCode = RunProcess(outputFolder, sourceFilePath, entityLabelsArgument);
-                //if (exitCode == 0)
-                //{
-                //    SendCommand(new Message { Type = MessageType.ISOLATE_SINGLE_IFC_COMPLETED });
-                //    return;
-                //}
-
-                //SendCommand(CreateFailure("Error", "There was an error while splitting the IFC."));
             }
             catch (Exception ex)
             {
@@ -118,47 +106,6 @@ namespace CoreLayer
 
             _lastSelectedFolder = folderDialog.SelectedPath;
             return folderDialog.SelectedPath;
-        }
-
-        static int RunProcess(string outputFolder, string sourceFilePath, string entityLabelsArgument)
-        {
-            using var splitterProcess = new Process();
-            splitterProcess.StartInfo.UseShellExecute = false;
-            splitterProcess.StartInfo.CreateNoWindow = true;
-            splitterProcess.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-            splitterProcess.StartInfo.FileName = ResolveSplitterPath();
-            splitterProcess.StartInfo.Arguments = $"\"{sourceFilePath}\" \"{outputFolder}\" \"{entityLabelsArgument}\"";
-            splitterProcess.StartInfo.RedirectStandardError = false;
-            splitterProcess.StartInfo.RedirectStandardOutput = false;
-            splitterProcess.Start();
-            splitterProcess.WaitForExit();
-
-            return splitterProcess.ExitCode;
-        }
-
-        static string ResolveSplitterPath()
-        {
-            var baseDirectory = AppContext.BaseDirectory;
-            var pluginDirectory = Directory.GetParent(baseDirectory.TrimEnd(Path.DirectorySeparatorChar))?.FullName;
-            var bimVisionDirectory = pluginDirectory == null
-                ? null
-                : Directory.GetParent(pluginDirectory.TrimEnd(Path.DirectorySeparatorChar))?.FullName;
-
-            var candidates = new[]
-            {
-                Path.Combine(baseDirectory, SplitterExecutableName),
-                pluginDirectory == null ? null : Path.Combine(pluginDirectory, SplitterExecutableName),
-                bimVisionDirectory == null ? null : Path.Combine(bimVisionDirectory, "plugins_x64", SplitterExecutableName),
-                bimVisionDirectory == null ? null : Path.Combine(bimVisionDirectory, "plugins", SplitterExecutableName),
-            };
-
-            foreach (var candidate in candidates)
-            {
-                if (!string.IsNullOrWhiteSpace(candidate) && File.Exists(candidate))
-                    return candidate;
-            }
-
-            throw new FileNotFoundException("Could not find " + SplitterExecutableName + " beside the plugin or in the BIM Vision plugin folders.");
         }
 
         static void SendCommand(Message command)
