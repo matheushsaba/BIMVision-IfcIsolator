@@ -23,8 +23,8 @@ namespace ApiLayer
 
         public override void GetPluginInfo(ref PluginInfo info)
         {
-            info.description = "Plugin to isolate elements into different IFC files.";
-            info.name = "Ifc Isolator";
+            info.description = "Plugin to find elements by its Guid.";
+            info.name = "Find By Guid";
             info.email = "-";
             info.producer = "Matheus Henrique Sabadin";
             info.www = "https://www.linkedin.com/in/m-sab/";
@@ -51,7 +51,7 @@ namespace ApiLayer
             _api.SetButtonImage(_pluginButton, Path.Combine(_assemblyFolder, "logo32.png"));
             _api.SetButtonSmallImage(_pluginButton, Path.Combine(_assemblyFolder, "logo16.png"));
             _api.SetGalleryItemImage(_pluginButton, Path.Combine(_assemblyFolder, "logo32.png"));
-            _api.SetButtonText(_pluginButton, "Isolate Into Single IFC", "Isolate selected elements into a new unique IFC file.");
+            _api.SetButtonText(_pluginButton, "Find By GUID", "Searches and selects the object with the given Global ID.");
             _api.EnableButton(_pluginButton, true);
 
             StartCoreListener();
