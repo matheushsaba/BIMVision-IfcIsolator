@@ -37,6 +37,22 @@
 	  <Folder Include="Dependencies\" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <None Update="C:\Users\Matheus\source\repos\BIMVision-IfcIsolator\CoreLayer\..\Dependencies\Esent.Interop.dll" Link="Dependencies\Esent.Interop.dll" />
+	  <None Update="C:\Users\Matheus\source\repos\BIMVision-IfcIsolator\CoreLayer\..\Dependencies\Microsoft.Extensions.DependencyInjection.Abstractions.dll" Link="Dependencies\Microsoft.Extensions.DependencyInjection.Abstractions.dll" />
+	  <None Update="C:\Users\Matheus\source\repos\BIMVision-IfcIsolator\CoreLayer\..\Dependencies\Microsoft.Extensions.DependencyInjection.dll" Link="Dependencies\Microsoft.Extensions.DependencyInjection.dll" />
+	  <None Update="C:\Users\Matheus\source\repos\BIMVision-IfcIsolator\CoreLayer\..\Dependencies\Microsoft.Extensions.Logging.Abstractions.dll" Link="Dependencies\Microsoft.Extensions.Logging.Abstractions.dll" />
+	  <None Update="C:\Users\Matheus\source\repos\BIMVision-IfcIsolator\CoreLayer\..\Dependencies\Microsoft.Extensions.Options.dll" Link="Dependencies\Microsoft.Extensions.Options.dll" />
+	  <None Update="C:\Users\Matheus\source\repos\BIMVision-IfcIsolator\CoreLayer\..\Dependencies\Microsoft.Extensions.Primitives.dll" Link="Dependencies\Microsoft.Extensions.Primitives.dll" />
+	  <None Update="C:\Users\Matheus\source\repos\BIMVision-IfcIsolator\CoreLayer\..\Dependencies\Xbim.Common.dll" Link="Dependencies\Xbim.Common.dll" />
+	  <None Update="C:\Users\Matheus\source\repos\BIMVision-IfcIsolator\CoreLayer\..\Dependencies\Xbim.Ifc.dll" Link="Dependencies\Xbim.Ifc.dll" />
+	  <None Update="C:\Users\Matheus\source\repos\BIMVision-IfcIsolator\CoreLayer\..\Dependencies\Xbim.Ifc2x3.dll" Link="Dependencies\Xbim.Ifc2x3.dll" />
+	  <None Update="C:\Users\Matheus\source\repos\BIMVision-IfcIsolator\CoreLayer\..\Dependencies\Xbim.Ifc4.dll" Link="Dependencies\Xbim.Ifc4.dll" />
+	  <None Update="C:\Users\Matheus\source\repos\BIMVision-IfcIsolator\CoreLayer\..\Dependencies\Xbim.Ifc4x3.dll" Link="Dependencies\Xbim.Ifc4x3.dll" />
+	  <None Update="C:\Users\Matheus\source\repos\BIMVision-IfcIsolator\CoreLayer\..\Dependencies\Xbim.IO.Esent.dll" Link="Dependencies\Xbim.IO.Esent.dll" />
+	  <None Update="C:\Users\Matheus\source\repos\BIMVision-IfcIsolator\CoreLayer\..\Dependencies\Xbim.IO.MemoryModel.dll" Link="Dependencies\Xbim.IO.MemoryModel.dll" />
+	</ItemGroup>
+
 	<Target Name="KillStaleCoreLayerProcess" BeforeTargets="CopyFilesToOutputDirectory" Condition="'$(Configuration)' == 'Debug'">
 		<Message Text="Stopping stale CoreLayer.exe process before copying Debug build output." Importance="High" />
 		<Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -Command &quot;Get-Process -Name 'CoreLayer' -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue&quot;" IgnoreExitCode="true" />
