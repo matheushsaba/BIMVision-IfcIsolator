@@ -15,16 +15,12 @@
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Platform)'=='x64'">
-		<OutputPath>C:\Program Files (x86)\Datacomp\BIM Vision\plugins_x64\IfcIsolatorPlugin\</OutputPath>
+		<OutputPath>C:\Program Files (x86)\Datacomp\BIM Vision\plugins_x64\FindByGuidPlugin\</OutputPath>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Platform)'=='x86'">
-		<OutputPath>C:\Program Files (x86)\Datacomp\BIM Vision\plugins\IfcIsolatorPlugin\</OutputPath>
+		<OutputPath>C:\Program Files (x86)\Datacomp\BIM Vision\plugins\FindByGuidPlugin\</OutputPath>
 	</PropertyGroup>
-
-	<ItemGroup>
-	  <None Include="$(MSBuildProjectDirectory)\..\Dependencies\**\*.*" Exclude="$(MSBuildProjectDirectory)\..\Dependencies\IfcIsolator.dll" CopyToOutputDirectory="PreserveNewest" Link="%(RecursiveDir)%(Filename)%(Extension)" TargetPath="%(RecursiveDir)%(Filename)%(Extension)" />
-	</ItemGroup>
 
 	<Target Name="KillStaleCoreLayerProcess" BeforeTargets="CopyFilesToOutputDirectory" Condition="'$(Configuration)' == 'Debug'">
 		<Message Text="Stopping stale CoreLayer.exe process before copying Debug build output." Importance="High" />
