@@ -7,10 +7,10 @@
     }
     public enum MessageType
     {
-        ISOLATE_SINGLE_IFC_REQUEST,
-        ISOLATE_SINGLE_IFC_COMPLETED,
-        ISOLATE_SINGLE_IFC_FAILED,
-        ISOLATE_SINGLE_IFC_CANCELED,
+        APP_READY,
+        SHOW_FIND_BY_GUID_WINDOW,
+        FIND_BY_GUID_REQUEST,
+        FIND_BY_GUID_COMPLETED,
     }
     public class Argument
     {

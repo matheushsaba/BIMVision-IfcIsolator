@@ -18,7 +18,7 @@ function Get-RepoRoot {
     return (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 }
 
-function Get-IfcIsolatorVersion {
+function Get-FindByGuidVersion {
     param([string] $RepoRoot)
 
     if ($Version) {
@@ -26,7 +26,7 @@ function Get-IfcIsolatorVersion {
     }
 
     [xml] $props = Get-Content (Join-Path $RepoRoot 'Directory.Build.props')
-    $props.Project.PropertyGroup.IfcIsolatorVersion
+    $props.Project.PropertyGroup.FindByGuidVersion
 }
 
 function Find-MSBuild {
@@ -166,12 +166,12 @@ function Assert-Payload {
     param([string] $PayloadRoot)
 
     $requiredFiles = @(
-        'plugins\IfcIsolatorPlugin.plg',
-        'plugins\IfcIsolatorPlugin\IfcIsolatorPlugin.dll',
-        'plugins\IfcIsolatorPlugin\CoreLayer.exe',
-        'plugins_x64\IfcIsolatorPlugin.plg',
-        'plugins_x64\IfcIsolatorPlugin\IfcIsolatorPlugin.dll',
-        'plugins_x64\IfcIsolatorPlugin\CoreLayer.exe'
+        'plugins\FindByGuidPlugin.plg',
+        'plugins\FindByGuidPlugin\FindByGuidPlugin.dll',
+        'plugins\FindByGuidPlugin\CoreLayer.exe',
+        'plugins_x64\FindByGuidPlugin.plg',
+        'plugins_x64\FindByGuidPlugin\FindByGuidPlugin.dll',
+        'plugins_x64\FindByGuidPlugin\CoreLayer.exe'
     )
 
     foreach ($relativePath in $requiredFiles) {
@@ -183,13 +183,13 @@ function Assert-Payload {
 }
 
 $repoRoot = Get-RepoRoot
-$solution = Join-Path $repoRoot 'BIMVision-IfcIsolator.sln'
+$solution = Join-Path $repoRoot 'FindByGuid.sln'
 $payloadRoot = Join-Path $PSScriptRoot 'payload'
-$x86Output = Join-Path $payloadRoot 'plugins\IfcIsolatorPlugin'
-$x64Output = Join-Path $payloadRoot 'plugins_x64\IfcIsolatorPlugin'
-$appVersion = Get-IfcIsolatorVersion -RepoRoot $repoRoot
+$x86Output = Join-Path $payloadRoot 'plugins\FindByGuidPlugin'
+$x64Output = Join-Path $payloadRoot 'plugins_x64\FindByGuidPlugin'
+$appVersion = Get-FindByGuidVersion -RepoRoot $repoRoot
 
-Write-Host "Preparing Ifc Isolator installer payload version $appVersion..."
+Write-Host "Preparing FindByGuid installer payload version $appVersion..."
 
 if (-not $SkipBuild) {
     if (Test-Path $payloadRoot) {
@@ -209,9 +209,9 @@ if ($StageOnly) {
 }
 
 $innoCompiler = Find-InnoCompiler
-$env:IFCISOLATOR_VERSION = $appVersion
+$env:FINDBYGUID_VERSION = $appVersion
 
-$exitCode = Invoke-Tool -FilePath $innoCompiler -Arguments @((Join-Path $PSScriptRoot 'IfcIsolatorPlugin.iss')) -WorkingDirectory $PSScriptRoot
+$exitCode = Invoke-Tool -FilePath $innoCompiler -Arguments @((Join-Path $PSScriptRoot 'FindByGuidPlugin.iss')) -WorkingDirectory $PSScriptRoot
 if ($exitCode -ne 0) {
     throw 'Inno Setup compilation failed.'
 }

@@ -1,4 +1,4 @@
-# Ifc Isolator Plugin Installer
+# Find By Guid Plugin Installer
 
 The installer is built with Inno Setup and produces a normal Windows `.exe` installer.
 
@@ -25,27 +25,24 @@ To only stage the payload without compiling the installer:
 The installer uses the installing machine's 32-bit Program Files folder, not a hardcoded user path:
 
 ```text
-{commonpf32}\Datacomp\BIM Vision\plugins\IfcIsolatorPlugin
-{commonpf32}\Datacomp\BIM Vision\plugins_x64\IfcIsolatorPlugin
+{commonpf32}\Datacomp\BIM Vision\plugins\FindByGuidPlugin
+{commonpf32}\Datacomp\BIM Vision\plugins_x64\FindByGuidPlugin
 ```
 
 It also writes the BIM Vision marker files:
 
 ```text
-{commonpf32}\Datacomp\BIM Vision\plugins\IfcIsolatorPlugin.plg
-{commonpf32}\Datacomp\BIM Vision\plugins_x64\IfcIsolatorPlugin.plg
+{commonpf32}\Datacomp\BIM Vision\plugins\FindByGuidPlugin.plg
+{commonpf32}\Datacomp\BIM Vision\plugins_x64\FindByGuidPlugin.plg
 ```
 
 ## Upgrade Behavior
 
-Each install removes the previous `IfcIsolatorPlugin` folders before copying the new version. It also removes the old flat-layout files:
+Each install removes the previous `FindByGuidPlugin` folders before copying the new version. It also removes the old flat-layout files:
 
 ```text
-plugins\IfcIsolatorPlugin_x86.dll
-plugins\IfcIsolatorTerminal_x64.exe
-plugins_x64\IfcIsolatorPlugin_x64.dll
-plugins_x64\IfcIsolatorPlugin_x64.dlll
-plugins_x64\IfcIsolatorTerminal_x64.exe
+plugins\FindByGuidPlugin_x86.dll
+plugins_x64\FindByGuidPlugin_x64.dll
 ```
 
 ## Future Bundle

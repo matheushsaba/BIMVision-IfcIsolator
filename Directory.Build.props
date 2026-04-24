@@ -1,16 +1,16 @@
 <Project>
   <PropertyGroup>
-    <IfcIsolatorVersion>1.2.0</IfcIsolatorVersion>
-    <IfcIsolatorAssemblyVersion>$(IfcIsolatorVersion).0</IfcIsolatorAssemblyVersion>
-    <IfcIsolatorFileVersion>$(IfcIsolatorAssemblyVersion)</IfcIsolatorFileVersion>
-    <IfcIsolatorInformationalVersion>$(IfcIsolatorVersion)</IfcIsolatorInformationalVersion>
+    <FindByGuidVersion>1.2.0</FindByGuidVersion>
+    <FindByGuidAssemblyVersion>$(FindByGuidVersion).0</FindByGuidAssemblyVersion>
+    <FindByGuidFileVersion>$(FindByGuidAssemblyVersion)</FindByGuidFileVersion>
+    <FindByGuidInformationalVersion>$(FindByGuidVersion)</FindByGuidInformationalVersion>
 
-    <VersionPrefix Condition="'$(VersionPrefix)' == ''">$(IfcIsolatorVersion)</VersionPrefix>
-    <Version Condition="'$(Version)' == ''">$(IfcIsolatorVersion)</Version>
+    <VersionPrefix Condition="'$(VersionPrefix)' == ''">$(FindByGuidVersion)</VersionPrefix>
+    <Version Condition="'$(Version)' == ''">$(FindByGuidVersion)</Version>
     <PackageVersion Condition="'$(PackageVersion)' == ''">$(Version)</PackageVersion>
-    <AssemblyVersion Condition="'$(AssemblyVersion)' == ''">$(IfcIsolatorAssemblyVersion)</AssemblyVersion>
-    <FileVersion Condition="'$(FileVersion)' == ''">$(IfcIsolatorFileVersion)</FileVersion>
-    <InformationalVersion Condition="'$(InformationalVersion)' == ''">$(IfcIsolatorInformationalVersion)</InformationalVersion>
+    <AssemblyVersion Condition="'$(AssemblyVersion)' == ''">$(FindByGuidAssemblyVersion)</AssemblyVersion>
+    <FileVersion Condition="'$(FileVersion)' == ''">$(FindByGuidFileVersion)</FileVersion>
+    <InformationalVersion Condition="'$(InformationalVersion)' == ''">$(FindByGuidInformationalVersion)</InformationalVersion>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
 </Project>

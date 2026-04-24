@@ -1,18 +1,26 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.IO.Pipes;
-using System.Security.Principal;
 using System.Text;
-using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace CoreLayer
 {
-    public partial class MainWindow
+    public sealed class MainWindow : ApplicationContext
     {
-        static string _lastSelectedFolder;
+        readonly FindByGuidWindow _findByGuidWindow;
+
+        public MainWindow()
+        {
+            _findByGuidWindow = new FindByGuidWindow(SendFindByGuidRequest);
+            _ = _findByGuidWindow.Handle;
+
+            InitializeApiListener();
+            SendReadyMessage();
+        }
 
         [STAThread]
         public static void Main()
@@ -20,83 +28,107 @@ namespace CoreLayer
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            ListenForApiCommands();
+            Application.Run(new MainWindow());
         }
 
-        static void ListenForApiCommands()
+        void InitializeApiListener()
         {
-            while (true)
+            Task.Run(() =>
             {
-                using var server = new NamedPipeServerStream("Api_To_Core_Pipe", PipeDirection.In, 1, PipeTransmissionMode.Message);
-
-                server.WaitForConnection();
-
-                using var reader = new StreamReader(server);
-                var msgString = reader.ReadLine();
-
-                if (msgString == null)
-                    continue;
-
-                var message = DeserializeMessage(msgString);
-
-                switch (message.Type)
+                while (true)
                 {
-                    case MessageType.ISOLATE_SINGLE_IFC_REQUEST:
-                        IsolateSingleIfc(message);
-                        break;
-                    default:
-                        break;
+                    using (var server = new NamedPipeServerStream("Api_To_Core_Pipe", PipeDirection.In, 1, PipeTransmissionMode.Message))
+                    {
+                        server.WaitForConnection();
+
+                        using (var reader = new StreamReader(server))
+                        {
+                            var msgString = reader.ReadLine();
+                            if (msgString == null)
+                                continue;
+
+                            var message = DeserializeMessage(msgString);
+
+                            switch (message.Type)
+                            {
+                                case MessageType.SHOW_FIND_BY_GUID_WINDOW:
+                                    ShowFindByGuidWindow(ParseWindowHandle(GetArgument(message, "ViewerHandle")));
+                                    break;
+                                case MessageType.FIND_BY_GUID_COMPLETED:
+                                    HandleFindByGuidCompleted(message);
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                    }
                 }
-            }
+            });
         }
 
-        static void IsolateSingleIfc(Message message)
+        void ShowFindByGuidWindow(IntPtr ownerHandle)
         {
-            var sourceFilePath = GetArgument(message, "SourceFilePath");
-            var entityLabelsArgument = GetArgument(message, "EntityLabels");
+            _findByGuidWindow.BeginInvoke((Action)(() => _findByGuidWindow.ShowOwnedWindow(ownerHandle)));
+        }
 
-            if (string.IsNullOrWhiteSpace(sourceFilePath) || string.IsNullOrWhiteSpace(entityLabelsArgument))
+        void HandleFindByGuidCompleted(Message message)
+        {
+            var countValue = GetArgument(message, "MatchCount");
+            var matchCount = 0;
+
+            if (!string.IsNullOrWhiteSpace(countValue))
             {
-                SendCommand(CreateFailure("Error", "The IFC isolation request did not include a source file and selected entity labels."));
-                return;
+                int.TryParse(countValue, NumberStyles.Integer, CultureInfo.InvariantCulture, out matchCount);
             }
 
-            var outputFolder = SelectOutputFolder();
-            if (string.IsNullOrWhiteSpace(outputFolder))
-            {
-                SendCommand(new Message { Type = MessageType.ISOLATE_SINGLE_IFC_CANCELED });
-                return;
-            }
+            _findByGuidWindow.BeginInvoke((Action)(() => _findByGuidWindow.HandleSearchCompleted(matchCount)));
+        }
 
+        void SendReadyMessage()
+        {
+            Task.Run(() =>
+            {
+                try
+                {
+                    SendCommand(new Message { Type = MessageType.APP_READY });
+                }
+                catch (Exception)
+                {
+                }
+            });
+        }
+
+        void SendFindByGuidRequest(string guid)
+        {
             try
             {
-                var entityLabels = entityLabelsArgument
-                    .Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)
-                    .Select(int.Parse);
-
-                SendCommand(new Message { Type = MessageType.ISOLATE_SINGLE_IFC_COMPLETED });
-                return;
+                SendCommand(new Message
+                {
+                    Type = MessageType.FIND_BY_GUID_REQUEST,
+                    Arguments = new[]
+                    {
+                        new Argument { Name = "Guid", Value = guid },
+                    },
+                });
+            }
+            catch (TimeoutException)
+            {
+                MessageBox.Show(
+                    _findByGuidWindow,
+                    "BIM Vision did not respond in time. Please try again.",
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {
-                SendCommand(CreateFailure("Error", "There was an error while splitting the IFC.", ex));
+                MessageBox.Show(
+                    _findByGuidWindow,
+                    "Unable to send the GUID search request.\n\n" + ex.Message,
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
             }
-        }
-
-        static string SelectOutputFolder()
-        {
-            using var folderDialog = new FolderBrowserDialog();
-            folderDialog.Description = "Select the output folder for the split IFC file(s)";
-            folderDialog.SelectedPath = string.IsNullOrWhiteSpace(_lastSelectedFolder)
-                ? Environment.GetFolderPath(Environment.SpecialFolder.Desktop)
-                : _lastSelectedFolder;
-
-            var result = folderDialog.ShowDialog();
-            if (result != DialogResult.OK || string.IsNullOrWhiteSpace(folderDialog.SelectedPath))
-                return null;
-
-            _lastSelectedFolder = folderDialog.SelectedPath;
-            return folderDialog.SelectedPath;
         }
 
         static void SendCommand(Message command)
@@ -108,21 +140,48 @@ namespace CoreLayer
             {
                 try
                 {
-                    using var client = new NamedPipeClientStream(".", "Core_To_Api_Pipe", PipeDirection.Out);
+                    using (var client = new NamedPipeClientStream(".", "Core_To_Api_Pipe", PipeDirection.Out))
+                    {
+                        client.Connect(500);
 
-                    client.Connect(500);
-
-                    using var writer = new StreamWriter(client);
-
-                    writer.AutoFlush = true;
-                    writer.WriteLine(serializedCommand);
-                    return;
+                        using (var writer = new StreamWriter(client))
+                        {
+                            writer.AutoFlush = true;
+                            writer.WriteLine(serializedCommand);
+                            return;
+                        }
+                    }
                 }
                 catch (TimeoutException) when (DateTime.UtcNow < deadline)
                 {
-                    Thread.Sleep(250);
+                    Task.Delay(250).Wait();
                 }
             }
+        }
+
+        static string GetArgument(Message message, string name)
+        {
+            if (message.Arguments == null)
+                return null;
+
+            foreach (var argument in message.Arguments)
+            {
+                if (string.Equals(argument.Name, name, StringComparison.OrdinalIgnoreCase))
+                    return argument.Value;
+            }
+
+            return null;
+        }
+
+        static IntPtr ParseWindowHandle(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return IntPtr.Zero;
+
+            long handleValue;
+            return long.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out handleValue)
+                ? new IntPtr(handleValue)
+                : IntPtr.Zero;
         }
 
         static string SerializeMessage(Message message)
@@ -173,39 +232,6 @@ namespace CoreLayer
         static string Decode(string value)
         {
             return Encoding.UTF8.GetString(Convert.FromBase64String(value));
-        }
-
-        static Message CreateFailure(string title, string message)
-        {
-            return CreateFailure(title, message, null);
-        }
-
-        static Message CreateFailure(string title, string message, Exception exception)
-        {
-            return new Message
-            {
-                Type = MessageType.ISOLATE_SINGLE_IFC_FAILED,
-                Arguments = new[]
-                {
-                    new Argument { Name = "Title", Value = title },
-                    new Argument { Name = "Message", Value = message },
-                    new Argument { Name = "Details", Value = exception?.ToString() },
-                },
-            };
-        }
-
-        static string GetArgument(Message message, string name)
-        {
-            if (message.Arguments == null)
-                return null;
-
-            foreach (var argument in message.Arguments)
-            {
-                if (string.Equals(argument.Name, name, StringComparison.OrdinalIgnoreCase))
-                    return argument.Value;
-            }
-
-            return null;
         }
     }
 }

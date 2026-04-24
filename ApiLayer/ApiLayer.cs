@@ -1,7 +1,8 @@
-﻿using BIMVision;
+using BIMVision;
 using System;
-using System.Diagnostics;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.IO.Pipes;
 using System.Linq;
@@ -9,17 +10,23 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace ApiLayer
 {
     public class ApiLayer : Plugin
     {
+        const string GuidPropertySetName = " Element Specific";
+        const string GuidPropertyName = "Guid";
+
         readonly string _assemblyFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        readonly ManualResetEventSlim _coreReadyEvent = new ManualResetEventSlim(false);
         ApiWrapper _api;
         int _pluginButton;
         Process _coreProcess;
         bool _coreListenerStarted;
         IntPtr _viewerHwnd;
+        Control _viewer;
 
         public override void GetPluginInfo(ref PluginInfo info)
         {
@@ -45,6 +52,7 @@ namespace ApiLayer
         {
             _api = new ApiWrapper(pid);
             _viewerHwnd = viewerHwnd;
+            _viewer = Control.FromHandle(viewerHwnd);
             StartupUpdateCheckPlaceholder.QueueGithubVersionCheck(_assemblyFolder);
 
             _pluginButton = _api.CreateButton(0, PluginButtonClick);
@@ -59,49 +67,44 @@ namespace ApiLayer
 
         public override void OnUnload()
         {
-            if (_coreProcess != null && !_coreProcess.HasExited)
+            _coreReadyEvent.Reset();
+
+            if (_coreProcess != null)
             {
-                _coreProcess.Kill();
+                if (!_coreProcess.HasExited)
+                {
+                    _coreProcess.Kill();
+                }
+
                 _coreProcess.Dispose();
+                _coreProcess = null;
             }
         }
 
         void PluginButtonClick()
         {
-            var selectedObjects = _api.GetSelected();
-            if (selectedObjects == null || selectedObjects.Length == 0)
-            {
-                ShowError("Error", "Objects need to be selected to split an IFC.");
-                return;
-            }
-
-            var sourceFilePath = _api.GetLoadedIfcPath();
-            if (string.IsNullOrWhiteSpace(sourceFilePath))
-            {
-                ShowError("Error", "No loaded IFC file path was found.");
-                return;
-            }
-
-            var entityLabels = selectedObjects
-                .Select(x => _api.GetObjectInfo(x).ifc_entity_number)
-                .ToArray();
-
-            var entityLabelsArgument = string.Join(" ", entityLabels);
-
             var exePath = Path.Combine(_assemblyFolder, "CoreLayer.exe");
 
             if (!EnsureCoreProcessStarted(exePath))
                 return;
 
+            if (!_coreReadyEvent.IsSet)
+            {
+                _coreReadyEvent.Wait(TimeSpan.FromSeconds(2));
+            }
+
             try
             {
                 SendCommand(new Message
                 {
-                    Type = MessageType.ISOLATE_SINGLE_IFC_REQUEST,
+                    Type = MessageType.SHOW_FIND_BY_GUID_WINDOW,
                     Arguments = new[]
                     {
-                        new Argument { Name = "SourceFilePath", Value = sourceFilePath },
-                        new Argument { Name = "EntityLabels", Value = entityLabelsArgument },
+                        new Argument
+                        {
+                            Name = "ViewerHandle",
+                            Value = _viewerHwnd.ToInt64().ToString(CultureInfo.InvariantCulture),
+                        },
                     },
                 });
             }
@@ -111,20 +114,28 @@ namespace ApiLayer
             }
             catch (Exception ex)
             {
-                ShowError("Error", "Unable to start IFC isolation.", ex);
+                ShowError("Error", "Unable to open the GUID search window.", ex);
             }
         }
 
         bool EnsureCoreProcessStarted(string exePath)
         {
-            if (_coreProcess != null && !_coreProcess.HasExited)
-                return true;
+            if (_coreProcess != null)
+            {
+                if (!_coreProcess.HasExited)
+                    return true;
+
+                _coreProcess.Dispose();
+                _coreProcess = null;
+            }
 
             if (!File.Exists(exePath))
             {
                 ShowError("Error", "CoreLayer.exe not found:\n" + exePath);
                 return false;
             }
+
+            _coreReadyEvent.Reset();
 
             var psi = new ProcessStartInfo
             {
@@ -156,30 +167,164 @@ namespace ApiLayer
                         {
                             var msgString = reader.ReadLine();
 
-                            if (msgString != null)
-                            {
-                                var message = DeserializeMessage(msgString);
+                            if (msgString == null)
+                                continue;
 
-                                switch (message.Type)
-                                {
-                                    case MessageType.ISOLATE_SINGLE_IFC_COMPLETED:
-                                        _api.MessageBox("Success", "The IFC was exported correctly.", 0);
-                                        break;
-                                    case MessageType.ISOLATE_SINGLE_IFC_FAILED:
-                                        ShowError(
-                                            GetArgument(message, "Title", "Error"),
-                                            GetArgument(message, "Message", "There was an error while splitting the IFC."),
-                                            GetArgument(message, "Details", null));
-                                        break;
-                                    case MessageType.ISOLATE_SINGLE_IFC_CANCELED:
-                                        break;
-                                    default: break;
-                                }
+                            var message = DeserializeMessage(msgString);
+
+                            switch (message.Type)
+                            {
+                                case MessageType.APP_READY:
+                                    _coreReadyEvent.Set();
+                                    break;
+                                case MessageType.FIND_BY_GUID_REQUEST:
+                                    DispatchToViewer(() => HandleFindByGuidRequest(message));
+                                    break;
+                                default:
+                                    break;
                             }
                         }
                     }
                 }
             });
+        }
+
+        void DispatchToViewer(Action action)
+        {
+            if (_viewer != null && !_viewer.IsDisposed && _viewer.InvokeRequired)
+            {
+                _viewer.BeginInvoke(action);
+                return;
+            }
+
+            action();
+        }
+
+        void HandleFindByGuidRequest(Message message)
+        {
+            var guid = GetArgument(message, "Guid", string.Empty);
+            if (string.IsNullOrWhiteSpace(guid))
+            {
+                SendFindByGuidCompleted(0);
+                return;
+            }
+
+            try
+            {
+                var objectsWithGuid = GetObjectsWithGuid(guid.Trim());
+
+                if (objectsWithGuid.Count == 1)
+                {
+                    SetObjectStatus(objectsWithGuid[0]);
+                }
+                else if (objectsWithGuid.Count > 1)
+                {
+                    SetObjectsStatus(objectsWithGuid);
+                }
+
+                SendFindByGuidCompleted(objectsWithGuid.Count);
+            }
+            catch (Exception ex)
+            {
+                ShowError("Error", "Unable to search for the requested GUID.", ex);
+            }
+        }
+
+        List<OBJECT_ID> GetObjectsWithGuid(string guid)
+        {
+            var objectsWithGuid = new List<OBJECT_ID>();
+            var allObjectIds = _api.GetAllObjects();
+
+            if (allObjectIds == null)
+                return objectsWithGuid;
+
+            foreach (var objectId in allObjectIds)
+            {
+                string objectGuid;
+
+                if (TryGetObjectGuid(objectId, out objectGuid) && string.Equals(objectGuid, guid, StringComparison.Ordinal))
+                {
+                    objectsWithGuid.Add(objectId);
+                }
+            }
+
+            return objectsWithGuid;
+        }
+
+        bool TryGetObjectGuid(OBJECT_ID objectId, out string guid)
+        {
+            guid = string.Empty;
+
+            var guidProperties = _api.FilterProperties(objectId, GuidPropertySetName, GuidPropertyName);
+            if (guidProperties != null)
+            {
+                foreach (var guidProperty in guidProperties)
+                {
+                    var value = guidProperty.value.value_str;
+                    if (!string.IsNullOrWhiteSpace(value))
+                    {
+                        guid = value;
+                        return true;
+                    }
+                }
+            }
+
+            var propertySets = _api.GetObjectProperties(objectId, 0);
+            if (propertySets == null)
+                return false;
+
+            var property = propertySets.FirstOrDefault(x => string.Equals(x.name, GuidPropertyName, StringComparison.OrdinalIgnoreCase));
+            if (string.IsNullOrWhiteSpace(property.value_str))
+                return false;
+
+            guid = property.value_str;
+            return true;
+        }
+
+        void SetObjectStatus(OBJECT_ID objectId)
+        {
+            _api.Select(objectId, true);
+            _api.ZoomToObjects(new[] { objectId }, 1);
+            _api.SetVisibleObject(objectId, VisibleType.vis_visible);
+            _api.SetObjectVisible(objectId, 1, false);
+            _api.SetObjectActive(objectId, true, false);
+        }
+
+        void SetObjectsStatus(List<OBJECT_ID> objectIds)
+        {
+            var objectIdsArray = objectIds.ToArray();
+
+            _api.SelectMany(objectIdsArray, SelectType.select_with_openings);
+            _api.ZoomToObjects(objectIdsArray, 1);
+            _api.SetVisibleManyObjects(objectIdsArray, VisibleType.vis_visible);
+            _api.SetVisibleMany(objectIdsArray, VisibleType.vis_visible);
+
+            foreach (var objectId in objectIdsArray)
+            {
+                _api.SetObjectActive(objectId, true, false);
+            }
+        }
+
+        void SendFindByGuidCompleted(int matchCount)
+        {
+            try
+            {
+                SendCommand(new Message
+                {
+                    Type = MessageType.FIND_BY_GUID_COMPLETED,
+                    Arguments = new[]
+                    {
+                        new Argument
+                        {
+                            Name = "MatchCount",
+                            Value = matchCount.ToString(CultureInfo.InvariantCulture),
+                        },
+                    },
+                });
+            }
+            catch (Exception)
+            {
+            }
         }
 
         static void SendCommand(Message command)
@@ -227,11 +372,6 @@ namespace ApiLayer
         void ShowError(string title, string message, Exception exception)
         {
             CopyableErrorDialog.Show(title, message, exception?.ToString(), _viewerHwnd);
-        }
-
-        void ShowError(string title, string message, string details)
-        {
-            CopyableErrorDialog.Show(title, message, details, _viewerHwnd);
         }
 
         static string SerializeMessage(Message message)
@@ -283,6 +423,5 @@ namespace ApiLayer
         {
             return Encoding.UTF8.GetString(Convert.FromBase64String(value));
         }
-
     }
 }
