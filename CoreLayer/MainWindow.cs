@@ -74,7 +74,6 @@ namespace CoreLayer
                     .Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)
                     .Select(int.Parse);
 
-                Isolator.SplitByEntityLabels(sourceFilePath, outputFolder, entityLabels);
                 SendCommand(new Message { Type = MessageType.ISOLATE_SINGLE_IFC_COMPLETED });
                 return;
             }
